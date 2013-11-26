@@ -74,6 +74,7 @@ projects[views_megarow][subdir] = "contrib"
 ; Commerce contrib
 projects[commerce_backoffice][subdir] = "contrib"
 projects[commerce_backoffice][version] = 1.3
+projects[commerce_backoffice][patch][] = "http://drupal.org/files/issues/2144705-1-remove-commerce-cart-dependency.patch"
 projects[commerce_billy][download][type] = "git"
 projects[commerce_billy][download][branch] = "7.x-1.x"
 projects[commerce_billy][subdir] = "contrib"
