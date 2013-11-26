@@ -86,5 +86,8 @@ dependencies[] = views_megarow
 dependencies[] = features
 dependencies[] = commerce_features
 
+; Install FakedIn features.
+dependencies[] = fakedin_core
+
 ; System Requirements.
 php_memory_limit = 128M
