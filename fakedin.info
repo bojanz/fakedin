@@ -69,6 +69,7 @@ dependencies[] = entityreference
 dependencies[] = email
 dependencies[] = libraries
 dependencies[] = link
+dependencies[] = mimemail_compress
 dependencies[] = module_filter
 dependencies[] = page_manager
 dependencies[] = panels

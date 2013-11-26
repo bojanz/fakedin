@@ -204,6 +204,9 @@ function fakedin_install() {
   // If Admin Menu is installed, collapse the module fieldsets.
   variable_set('admin_menu_tweak_modules', TRUE);
 
+  // Configure Mimemail.
+  variable_set('mimemail_format', 'full_html');
+
   // Add a shortcut set for store administration.
   $set = new stdClass;
   $set->title = st('Store administration');
