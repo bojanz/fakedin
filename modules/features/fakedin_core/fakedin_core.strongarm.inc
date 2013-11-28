@@ -51,5 +51,14 @@ function fakedin_core_strongarm() {
   );
   $export['commerce_license_product_types'] = $strongarm;
 
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'commerce_license_role_product_types';
+  $strongarm->value = array(
+    'plan' => 'plan',
+  );
+  $export['commerce_license_role_product_types'] = $strongarm;
+
   return $export;
 }
