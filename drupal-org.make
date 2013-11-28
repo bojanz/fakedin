@@ -81,17 +81,16 @@ projects[commerce_billy][download][branch] = "7.x-1.x"
 projects[commerce_billy][subdir] = "contrib"
 projects[commerce_billy][patch][] = "http://drupal.org/files/issues/2130111-4-remove-features-dependency.patch"
 projects[commerce_billy][patch][] = "http://drupal.org/files/issues/2050123-10-advanced-number-patterns.patch"
-projects[commerce_cardonfile][version] = "2.x-dev"
+projects[commerce_cardonfile][version] = 2.x-dev
 projects[commerce_cardonfile][subdir] = "contrib"
-; Update dunning to the -dev release once it gets generated.
 projects[commerce_dunning][subdir] = "contrib"
-projects[commerce_dunning][version] = 1.0-beta1
+projects[commerce_dunning][version] = 1.x-dev
 projects[commerce_features][subdir] = "contrib"
 projects[commerce_features][version] = 1.0
 projects[commerce_license][subdir] = "contrib"
-projects[commerce_license][version] = "1.x-dev"
+projects[commerce_license][version] = 1.x-dev
 projects[commerce_license_billing][subdir] = "contrib"
-projects[commerce_license_billing][version] = "1.x-dev"
+projects[commerce_license_billing][version] = 1.x-dev
 projects[commerce_single_address][subdir] = "contrib"
 projects[commerce_single_address][version] = 1.1
 
