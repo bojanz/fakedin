@@ -5,6 +5,7 @@ package = Features
 dependencies[] = commerce_features
 dependencies[] = commerce_license
 dependencies[] = commerce_license_billing
+dependencies[] = commerce_license_role
 dependencies[] = ctools
 dependencies[] = entity
 dependencies[] = entityreference
