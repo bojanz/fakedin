@@ -5,3 +5,38 @@
  */
 
 include_once 'fakedin_user.features.inc';
+
+/**
+ * Implements hook_profile2_presave().
+ *
+ * Keeps the profile label in sync with the custom full name field.
+ */
+function fakedin_user_profile2_presave($profile) {
+  if (!empty($profile->field_full_name)) {
+    $wrapper = entity_metadata_wrapper('profile2', $profile);
+    $profile->label = $wrapper->field_full_name->value();
+  }
+}
+
+/**
+ * Implements hook_user_insert().
+ *
+ * After a user has been created, create the matching profile.
+ * profile2 doesn't do this by default, choosing to display an empty profile
+ * when the profile/:uid url is visited, and constructing a new profile once
+ * profile/:uid/edit is visited for the first time (the submission of which
+ * saves it).
+ * By doing an explicit profile save right after user insert we get the
+ * chance to set the profile label, allowing the profile page to have a nicer
+ * look from the start.
+ */
+function fakedin_user_user_insert($user) {
+  // hook_user_insert() gets an array, not an object. Because logic.
+  $user = (object) $user;
+  $profile = profile2_create(array('type' => 'profile'));
+  $profile->setUser($user);
+  // The full name is not known yet, so set the initial label to the username.
+  $profile->label = $user->name;
+  $profile->is_new = TRUE;
+  $profile->save();
+}
