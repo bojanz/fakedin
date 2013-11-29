@@ -14,6 +14,13 @@ function fakedin_user_ctools_plugin_api($module = NULL, $api = NULL) {
 }
 
 /**
+ * Implements hook_views_api().
+ */
+function fakedin_user_views_api($module = NULL, $api = NULL) {
+  return array("api" => "3.0");
+}
+
+/**
  * Implements hook_default_profile2_type().
  */
 function fakedin_user_default_profile2_type() {
