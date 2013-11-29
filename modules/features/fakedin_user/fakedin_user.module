@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the FakedIn User feature.
+ */
+
+include_once 'fakedin_user.features.inc';

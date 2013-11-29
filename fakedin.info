@@ -89,6 +89,7 @@ dependencies[] = commerce_features
 
 ; Install FakedIn modules.
 dependencies[] = fakedin_core
+dependencies[] = fakedin_user
 
 ; System Requirements.
 php_memory_limit = 128M
