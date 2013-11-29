@@ -1,7 +1,7 @@
 name = FakedIn Core
 description = Defines the base FakedIn functionality
 core = 7.x
-package = Features
+package = FakedIn
 dependencies[] = commerce_features
 dependencies[] = commerce_license
 dependencies[] = commerce_license_billing
