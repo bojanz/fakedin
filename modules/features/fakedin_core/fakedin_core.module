@@ -5,3 +5,12 @@
  */
 
 include_once 'fakedin_core.features.inc';
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function fakedin_core_ctools_plugin_directory($owner, $plugin_type) {
+  if ($owner == 'commerce_license') {
+    return "plugins/$plugin_type";
+  }
+}
