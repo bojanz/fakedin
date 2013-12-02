@@ -14,6 +14,7 @@ function fakedin_user_user_default_permissions() {
   $permissions['edit own profile profile'] = array(
     'name' => 'edit own profile profile',
     'roles' => array(
+      'administrator' => 'administrator',
       'basic member' => 'basic member',
       'premium member' => 'premium member',
       'trial member' => 'trial member',

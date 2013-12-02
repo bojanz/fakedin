@@ -35,14 +35,7 @@ function fakedin_core_field_default_field_bases() {
     'deleted' => 0,
     'entity_types' => array(),
     'field_name' => 'field_usage_product',
-    'foreign keys' => array(
-      'commerce_product' => array(
-        'columns' => array(
-          'target_id' => 'product_id',
-        ),
-        'table' => 'commerce_product',
-      ),
-    ),
+    'foreign keys' => array(),
     'indexes' => array(
       'target_id' => array(
         0 => 'target_id',
