@@ -6,17 +6,57 @@
  */
 
 /**
- * Implements hook_install_tasks_alter().
+ * Implements hook_install_tasks().
  */
-function fakedin_install_tasks_alter(&$tasks, $install_state) {
+function fakedin_install_tasks() {
   // Increase maximum function nesting level to prevent install errors.
   $max_nesting_level = ini_get('xdebug.max_nesting_level');
   if ($max_nesting_level > 0 && $max_nesting_level <= '200') {
     ini_set('xdebug.max_nesting_level', 200);
   }
+  // Remove any status messages that might have been set. They are unneeded.
+  drupal_get_messages('status', TRUE);
 
+  $tasks = array();
+  $tasks['fakedin_import_content'] = array(
+    'display_name' => st('Import content'),
+    'type' => 'batch',
+    'display' => TRUE,
+  );
+
+  return $tasks;
+}
+
+/**
+ * Implements hook_install_tasks_alter().
+ */
+function fakedin_install_tasks_alter(&$tasks, $install_state) {
   $tasks['install_finished']['function'] = 'fakedin_install_finished';
   $tasks['install_select_profile']['display'] = FALSE;
+}
+
+
+/**
+ * Task callback: return a batch API array with the products to be imported.
+ */
+function fakedin_import_content() {
+  $operations = array();
+  foreach (module_implements('fakedin_demo_content_install') as $module) {
+    $operations[] = array('fakedin_import_content_batch', array($module));
+  }
+  $batch = array(
+    'title' => t('Importing content'),
+    'operations' => $operations,
+  );
+
+  return $batch;
+}
+
+/**
+ * Batch callback: Imports the demo content.
+ */
+function fakedin_import_content_batch($module, &$context) {
+  module_invoke($module, 'fakedin_demo_content_install');
 }
 
 /**
@@ -53,7 +93,6 @@ function fakedin_install_finished(&$install_state) {
 
   // Run cron to populate update status tables (if available) so that users
   // will be warned if they've installed an out of date Drupal version.
-  // Will also trigger indexing of profile-supplied content or feeds.
   drupal_cron_run();
 
   if (isset($messages['error'])) {

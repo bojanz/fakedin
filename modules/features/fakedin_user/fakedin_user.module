@@ -44,10 +44,152 @@ function fakedin_user_profile2_presave($profile) {
 function fakedin_user_user_insert($user) {
   // hook_user_insert() gets an array, not an object. Because logic.
   $user = (object) $user;
-  $profile = profile2_create(array('type' => 'profile'));
-  $profile->setUser($user);
-  // The full name is not known yet, so set the initial label to the username.
-  $profile->label = $user->name;
-  $profile->is_new = TRUE;
-  $profile->save();
+  if (!isset($user->_no_profile_save)) {
+    $profile = profile2_create(array('type' => 'profile'));
+    $profile->setUser($user);
+    // The full name is not known yet, so set the initial label to the username.
+    $profile->label = $user->name;
+    $profile->is_new = TRUE;
+    $profile->save();
+  }
+}
+
+/**
+ * Implements hook_fakedin_demo_content_install().
+ *
+ * @todo This takes 7.15s on a slow laptop (so about a second per user).
+ * Needs to be batched.
+ */
+function fakedin_user_fakedin_demo_content_install() {
+  module_load_include('inc', 'fakedin_user', 'fakedin_user.demo_content');
+  $basic_plan_product = commerce_product_load_by_sku('BASIC-PLAN');
+  $users = fakedin_user_demo_users();
+  $terms_by_vocabulary = fakedin_user_demo_terms();
+  // Create taxonomy terms for the industries.
+  $terms = array();
+  foreach ($terms_by_vocabulary as $vocabulary_name => $term_definitions) {
+    $vocabulary = taxonomy_vocabulary_machine_name_load($vocabulary_name);
+    foreach ($term_definitions as $term_name) {
+      $term = taxonomy_get_term_by_name($term_name);
+      if (!$term) {
+        $term = entity_create('taxonomy_term', array('vocabulary_machine_name' => $vocabulary_name));
+        $term->name = $term_name;
+        $term->vid = $vocabulary->vid;
+        taxonomy_term_save($term);
+        $terms[$term_name] = $term;
+      }
+      else {
+        $terms[$term_name] = reset($term);
+      }
+    }
+  }
+  // Create taxonomy terms for the companies.
+  $companies = array();
+  $company_vocabulary = taxonomy_vocabulary_machine_name_load('companies');
+  foreach ($users as $user_definition) {
+    foreach ($user_definition['profile']['experience'] as $experience_definition) {
+      $company_name = $experience_definition['company'];
+      if (!isset($companies[$company_name])) {
+        $company = taxonomy_get_term_by_name($company_name);
+        if (!$company) {
+          $company = entity_create('taxonomy_term', array('vocabulary_machine_name' => 'companies'));
+          $company->name = $company_name;
+          $company->vid = $company_vocabulary->vid;
+          taxonomy_term_save($company);
+          $companies[$company_name] = $company;
+        }
+        else {
+          $companies[$company_name] = reset($company);
+        }
+      }
+    }
+  }
+
+  foreach ($users as $user_definition) {
+    // Create and save the user first.
+    $user = entity_create('user', array());
+    $user->name = $user_definition['name'];
+    $user->pass = $user_definition['password'];
+    $user->email = $user_definition['email'];
+    $user->roles = array();
+    $user->_no_profile_save = TRUE;
+    user_save($user);
+
+    // Then create an order. Save it right away to get the order id.
+    $order = commerce_order_new($user->uid, 'completed');
+    commerce_order_save($order);
+    $line_item = commerce_product_line_item_new($basic_plan_product, 1, $order->order_id);
+    // Process the unit price through Rules so it reflects the user's actual
+    // purchase price.
+    rules_invoke_event('commerce_product_calculate_sell_price', $line_item);
+    commerce_line_item_save($line_item);
+    $order_wrapper = entity_metadata_wrapper('commerce_order', $order);
+    $order_wrapper->commerce_line_items[] = $line_item;
+    $order_wrapper->save();
+    // Register a payment transaction. This will activate the license.
+    $transaction = commerce_payment_transaction_new('commerce_payment_example', $order->order_id);
+    $transaction->instance_id = 'commerce_payment_example|commerce_payment_commerce_payment_example';
+    $transaction->amount = $order_wrapper->commerce_order_total->amount->value();
+    $transaction->currency_code = $order_wrapper->commerce_order_total->currency_code->value();
+    $transaction->status = COMMERCE_PAYMENT_STATUS_SUCCESS;
+    $transaction->message = 'Name: @name';
+    $transaction->message_variables = array('@name' => 'FakedIn example payment');
+    commerce_payment_transaction_save($transaction);
+
+    // Then save the user's image.
+    $source = drupal_get_path('module', 'fakedin_user') . '/images/' . $user_definition['profile']['image'];
+    $destination = 'public://' . $user_definition['profile']['image'];
+    file_unmanaged_copy($source, $destination, FILE_EXISTS_REPLACE);
+    drupal_chmod($destination);
+    $file = new stdClass;
+    $file->type = 'image';
+    $file->uri = $destination;
+    $file->uid = $user->uid;
+    $file->filename = drupal_basename($destination);
+    $file->filemime = file_get_mimetype(urldecode($destination));
+    $file->status = FILE_STATUS_PERMANENT;
+    if ($slash_pos = strpos($file->filemime, '/')) {
+      $file->type = substr($file->filemime, 0, $slash_pos);
+    }
+    file_save($file);
+
+    // Create the profile.
+    $profile = profile2_create(array('type' => 'profile'));
+    $profile->setUser($user);
+    $profile->is_new = TRUE;
+    $profile_wrapper = entity_metadata_wrapper('profile2', $profile);
+    $profile_wrapper->field_full_name = $user_definition['profile']['full name'];
+    $profile_wrapper->field_headline = $user_definition['profile']['headline'];
+    $profile_wrapper->field_country = country_load($user_definition['profile']['country']);
+    $profile_wrapper->field_industry = $terms[$user_definition['profile']['industry']];
+    $profile_wrapper->field_background = $user_definition['profile']['background'];
+    $profile_wrapper->field_user_image = array('fid' => $file->fid);
+    $profile_wrapper->save();
+
+    // Then create the experience field collections.
+    // The collections require the profile entity to be set, which is why
+    // they need to be created after the profile, then referenced on the profile.
+    // Yay for circular references!
+    $experience_list = array();
+    foreach ($user_definition['profile']['experience'] as $experience_definition) {
+      $experience = entity_create('field_collection_item', array('field_name' => 'field_experience'));
+      $experience->setHostEntity('profile2', $profile);
+      $experience_wrapper = entity_metadata_wrapper('field_collection_item', $experience);
+      $experience_wrapper->field_title = $experience_definition['title'];
+      $experience_wrapper->field_description = $experience_definition['description'];
+      $experience_wrapper->field_company = $companies[$experience_definition['company']];
+      $duration = array('value' => $experience_definition['duration']['start']);
+      if (!empty($experience_definition['duration']['end'])) {
+        $duration['value2'] = $experience_definition['duration']['end'];
+      }
+      $experience_wrapper->field_duration = $duration;
+      $experience_wrapper->save();
+      $experience_list[] = array('value' => $experience->item_id, 'revision_id' => $experience->revision_id);
+    }
+    if (!empty($experience_list)) {
+      // @todo Find out why this fails with the wrapper.
+      $profile->field_experience[LANGUAGE_NONE] = $experience_list;
+      $profile->save();
+    }
+  }
 }

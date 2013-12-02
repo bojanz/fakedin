@@ -14,3 +14,41 @@ function fakedin_core_ctools_plugin_directory($owner, $plugin_type) {
     return "plugins/$plugin_type";
   }
 }
+
+/**
+ * Implements hook_fakedin_demo_content_install().
+ */
+function fakedin_core_fakedin_demo_content_install() {
+  module_load_include('inc', 'fakedin_core', 'fakedin_core.demo_content');
+  $billing_cycle_type = entity_load_single('cl_billing_cycle_type', 'monthly');
+  $products = fakedin_core_demo_products();
+  foreach ($products as $product_definition) {
+    // Create and save the usage product first.
+    $usage_product = commerce_product_new('product');
+    $usage_product_wrapper = entity_metadata_wrapper('commerce_product', $usage_product);
+    $usage_product_wrapper->sku = $product_definition['usage product']['sku'];
+    $usage_product_wrapper->title = $product_definition['usage product']['title'];
+    $usage_product_wrapper->commerce_price->amount = $product_definition['usage product']['price'];
+    $usage_product_wrapper->status = 1;
+    $usage_product_wrapper->save();
+
+    // Create the plan.
+    $roles = user_roles(TRUE);
+    $role_ids = array_flip($roles);
+    $product = commerce_product_new('plan');
+    $product_wrapper = entity_metadata_wrapper('commerce_product', $product);
+    $product_wrapper->sku = $product_definition['sku'];
+    $product_wrapper->title = $product_definition['title'];
+    $product_wrapper->commerce_price->amount = $product_definition['price'];
+    $product_wrapper->field_free_posts_quota = $product_definition['free posts'];
+    $product_wrapper->field_usage_product = $usage_product;
+    $product_wrapper->commerce_license_type = 'fakedin';
+    $product_wrapper->commerce_license_duration = 0;
+    $product_wrapper->commerce_license_role = $role_ids[$product_definition['role']];
+    // @todo Find out why the wrapper can't set cl_billing_cycle_type here.
+    $product->cl_billing_cycle_type[LANGUAGE_NONE][0]['target_id'] = $billing_cycle_type->billing_cycle_type_id;
+    $product_wrapper->cl_billing_type = 'prepaid';
+    $product_wrapper->status = 1;
+    $product_wrapper->save();
+  }
+}
