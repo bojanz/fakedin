@@ -1,0 +1,43 @@
+<?php
+/**
+ * @file
+ * Code for the Fakedin Wall feature.
+ */
+
+include_once 'fakedin_wall.features.inc';
+
+/**
+ * Implements hook_default_message_type_category().
+ */
+function fakedin_wall_default_message_type_category() {
+  $items = array();
+  $items['fakedin_wall'] = entity_import('message_type_category', '{
+    "category" : "fakedin_wall",
+    "description" : "A message posted on the FakedIn wall.",
+    "language" : "en"
+  }');
+
+  return $items;
+}
+
+/**
+ * Implements hook_message_insert().
+ */
+function fakedin_wall_message_insert($message) {
+  if ($message->type == 'fakedin_wall') {
+    // Load the active license for the message author and register new usage.
+    $query = new EntityFieldQuery;
+    $query
+      ->entityCondition('entity_type', 'commerce_license')
+      ->entityCondition('bundle', 'fakedin')
+      ->propertyCondition('uid', $message->uid)
+      ->propertyCondition('status', COMMERCE_LICENSE_ACTIVE);
+    $result = $query->execute();
+    if ($result) {
+      $license_id = key($result['commerce_license']);
+      $license = entity_load_single('commerce_license', $license_id);
+      $usage_group = commerce_license_billing_usage_group($license, 'posts');
+      $usage_group->addUsage($license->revision_id, 1, REQUEST_TIME, REQUEST_TIME + 1);
+    }
+  }
+}
