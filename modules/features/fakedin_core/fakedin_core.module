@@ -63,6 +63,7 @@ function fakedin_core_plan_form_submit($form, &$form_state) {
   $order_wrapper->commerce_line_items[] = $line_item;
   $order_wrapper->save();
 
+  $_SESSION['commerce_cart_orders'] = array($order->order_id);
   $form_state['redirect'] = 'checkout/' . $order->order_id;
 }
 
