@@ -61,6 +61,7 @@ function fakedin_user_user_insert($user) {
  * Needs to be batched.
  */
 function fakedin_user_fakedin_demo_content_install() {
+  require_once DRUPAL_ROOT . '/' . variable_get('password_inc', 'includes/password.inc');
   module_load_include('inc', 'fakedin_user', 'fakedin_user.demo_content');
   $basic_plan_product = commerce_product_load_by_sku('BASIC-PLAN');
   $users = fakedin_user_demo_users();
@@ -109,9 +110,10 @@ function fakedin_user_fakedin_demo_content_install() {
     // Create and save the user first.
     $user = entity_create('user', array());
     $user->name = $user_definition['name'];
-    $user->pass = $user_definition['password'];
+    $user->pass = user_hash_password($user_definition['password']);
     $user->email = $user_definition['email'];
-    $user->roles = array();
+    $user->status = 1;
+    $user->roles = array(4 => 4);
     $user->_no_profile_save = TRUE;
     user_save($user);
 
