@@ -10,9 +10,121 @@ include_once 'fakedin_core.features.inc';
  * Implements hook_ctools_plugin_directory().
  */
 function fakedin_core_ctools_plugin_directory($owner, $plugin_type) {
-  if ($owner == 'commerce_license') {
-    return "plugins/$plugin_type";
+  if ($owner == 'commerce_license' || $owner == 'ctools') {
+    return 'plugins/' . $plugin_type;
   }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function fakedin_core_theme($existing, $type, $theme, $path)  {
+  return array(
+    'fakedin_core_plan_form' => array(
+      'render element' => 'form',
+    ),
+  );
+}
+
+/**
+ * Form builder: Returns a plan selection form.
+ */
+function fakedin_core_plan_form($form, &$form_state) {
+  $form['#theme'] = 'fakedin_core_plan_form';
+  $form['#plans'] = $plans = fakedin_core_get_plans();
+  foreach ($plans as $plan) {
+    $form['plan_select'][$plan->product_id] = array(
+      '#type' => 'submit',
+      '#value' => t('Choose plan'),
+      '#plan_id' => $plan->product_id,
+    );
+  }
+
+  return $form;
+}
+
+/**
+ * Submit handler: Initiates checkout.
+ */
+function fakedin_core_plan_form_submit($form, &$form_state) {
+  global $user;
+
+  $plan_id = $form_state['triggering_element']['#plan_id'];
+  $plan = commerce_product_load($plan_id);
+
+  $order = commerce_order_new($user->uid, 'checkout_checkout');
+  commerce_order_save($order);
+  $line_item = commerce_product_line_item_new($plan, 1, $order->order_id);
+  // Process the unit price through Rules so it reflects the user's actual
+  // purchase price.
+  rules_invoke_event('commerce_product_calculate_sell_price', $line_item);
+  commerce_line_item_save($line_item);
+  $order_wrapper = entity_metadata_wrapper('commerce_order', $order);
+  $order_wrapper->commerce_line_items[] = $line_item;
+  $order_wrapper->save();
+
+  $form_state['redirect'] = 'checkout/' . $order->order_id;
+}
+
+/**
+ * Returns HTML for a plan form.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - form: A render element representing the form.
+ *
+ * @ingroup themeable
+ */
+function theme_fakedin_core_plan_form($variables) {
+  $form = $variables['form'];
+
+  // The first column of the header is intentionally left blank.
+  $header = array('');
+  $rows = array(
+    array('Monthly price'),
+    array('Free posts'),
+    array('Additional posts'),
+    array('Profile videos'),
+    array(''),
+  );
+
+  $plan_index = 1;
+  foreach ($form['#plans'] as $plan) {
+    $plan_wrapper = entity_metadata_wrapper('commerce_product', $plan);
+    $price = commerce_product_calculate_sell_price($plan);
+    $formatted_price = commerce_currency_format($price['amount'], $price['currency_code']);
+    $usage_price = $plan_wrapper->field_usage_product->commerce_price->value();
+    $formatted_usage_price = commerce_currency_format($usage_price['amount'], $usage_price['currency_code']);
+
+    $header[] = $plan->title;
+    $rows[0][$plan_index] = $formatted_price;
+    $rows[1][$plan_index] = t('@posts posts', array('@posts' => $plan_wrapper->field_free_posts_quota->value()));
+    $rows[2][$plan_index] = t('@usage_price per post', array('@usage_price' => $formatted_usage_price));
+    $rows[3][$plan_index] = ($plan->sku == 'PREMIUM-PLAN') ? t('Yes') : t('No');
+    $rows[4][$plan_index] = drupal_render($form['plan_select'][$plan->product_id]);
+
+    $plan_index++;
+  }
+  $variables = array(
+    'header' => $header,
+    'rows' => $rows,
+    'attributes' => array('class' => array('fakedin-pane-form')),
+  );
+  return theme('table', $variables) . drupal_render_children($form);
+}
+
+/**
+ * Returns all enabled plan products.
+ */
+function fakedin_core_get_plans() {
+  $query = new EntityFieldQuery;
+  $query
+    ->entityCondition('entity_type', 'commerce_product')
+    ->entityCondition('bundle', 'plan')
+    ->propertyCondition('status', 1);
+  $result = $query->execute();
+  $product_ids = array_keys($result['commerce_product']);
+  return commerce_product_load_multiple($product_ids);
 }
 
 /**
