@@ -16,6 +16,18 @@ function fakedin_core_ctools_plugin_directory($owner, $plugin_type) {
 }
 
 /**
+ * Implements hook_commerce_license_types_list_alter().
+ */
+function fakedin_core_commerce_license_types_list_alter(&$types, $product) {
+  // Remove the role option completely, 'fakedin' is there to replace it.
+  unset($types['role']);
+  // If a product type is not role-enabled, remove 'fakedin' as well.
+  if (!empty($product) && !in_array($product->type, commerce_license_role_product_types())) {
+    unset($types['fakedin']);
+  }
+}
+
+/**
  * Implements hook_theme().
  */
 function fakedin_core_theme($existing, $type, $theme, $path)  {
