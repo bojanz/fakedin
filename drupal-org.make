@@ -106,7 +106,7 @@ projects[commerce_license][version] = 1.x-dev
 projects[commerce_license_billing][subdir] = "contrib"
 projects[commerce_license_billing][version] = 1.x-dev
 projects[commerce_single_address][subdir] = "contrib"
-projects[commerce_single_address][version] = 1.1
+projects[commerce_single_address][version] = 1.x-dev
 
 ; Themes
 projects[shiny][version] = 1.4
