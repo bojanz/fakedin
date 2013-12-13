@@ -17,6 +17,13 @@ function fakedin_wall_ctools_plugin_api($module = NULL, $api = NULL) {
 }
 
 /**
+ * Implements hook_views_api().
+ */
+function fakedin_wall_views_api($module = NULL, $api = NULL) {
+  return array("api" => "3.0");
+}
+
+/**
  * Implements hook_default_message_type().
  */
 function fakedin_wall_default_message_type() {

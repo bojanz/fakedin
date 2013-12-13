@@ -24,6 +24,18 @@ function fakedin_wall_field_default_field_instances() {
         'type' => 'text_default',
         'weight' => 0,
       ),
+      'message_notify_email_body' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'message_notify_email_subject' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
     ),
     'entity_type' => 'message',
     'field_name' => 'field_body',
