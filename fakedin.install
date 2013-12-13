@@ -176,9 +176,13 @@ function fakedin_install() {
 
   // Enable the admin theme.
   $admin_theme = 'shiny';
+  $theme = 'media_responsive_theme';
   theme_enable(array($admin_theme));
   variable_set('admin_theme', $admin_theme);
   variable_set('node_admin_theme', '1');
+
+  // Enable the front-end theme.
+  variable_set('theme_default', $theme);
 
   // Insert default pre-defined node types into the database.
   $types = array(

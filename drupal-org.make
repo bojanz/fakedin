@@ -110,3 +110,4 @@ projects[commerce_single_address][version] = 1.1
 
 ; Themes
 projects[shiny][version] = 1.4
+projects[media-responsive-theme][version] = 1.4
