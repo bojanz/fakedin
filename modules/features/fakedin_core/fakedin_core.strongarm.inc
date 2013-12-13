@@ -34,6 +34,30 @@ function fakedin_core_strongarm() {
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
+  $strongarm->name = 'commerce_checkout_registration_account_notification';
+  $strongarm->value = 0;
+  $export['commerce_checkout_registration_account_notification'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'commerce_checkout_registration_confirmation_text';
+  $strongarm->value = array(
+    'value' => 'Thank you for becoming a FakedIn member. You can now create your account.',
+    'format' => 'filtered_html',
+  );
+  $export['commerce_checkout_registration_confirmation_text'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'commerce_checkout_registration_password_required';
+  $strongarm->value = 1;
+  $export['commerce_checkout_registration_password_required'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
   $strongarm->name = 'commerce_license_line_item_types';
   $strongarm->value = array(
     'product' => 'product',

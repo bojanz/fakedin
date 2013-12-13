@@ -28,6 +28,15 @@ function fakedin_core_commerce_license_types_list_alter(&$types, $product) {
 }
 
 /**
+ * Implements hook_commerce_checkout_pane_info_alter().
+ */
+function fakedin_core_commerce_checkout_pane_info_alter(&$info) {
+  $info['checkout_completion_message']['enabled'] = FALSE;
+  $info['commerce_license_complete']['enabled'] = FALSE;
+  $info['commerce_checkout_complete_registration']['fieldset'] = FALSE;
+}
+
+/**
  * Implements hook_theme().
  */
 function fakedin_core_theme($existing, $type, $theme, $path)  {

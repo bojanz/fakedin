@@ -28,13 +28,4 @@ class CommerceLicenseFakedIn extends CommerceLicenseRole implements CommerceLice
     $usage = commerce_license_billing_current_usage($this, 'posts');
     return t('Posts: @posts', array('@posts' => $usage));
   }
-
-  /**
-   * Implements CommerceLicenseInterface::checkoutCompletionMessage().
-   */
-  public function checkoutCompletionMessage() {
-    $message = 'Thank you for becoming a FakedIn member! <br />';
-    $message = 'You can now ' . l('edit your profile', 'profile/' . $this->uid . '/edit') . '.';
-    return $message;
-  }
 }
