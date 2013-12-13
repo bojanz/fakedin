@@ -45,6 +45,7 @@ features[variable][] = commerce_checkout_registration_password_required
 features[variable][] = commerce_license_line_item_types
 features[variable][] = commerce_license_product_types
 features[variable][] = commerce_license_role_product_types
+features[variable][] = site_frontpage
 features_exclude[dependencies][commerce_price] = commerce_price
 features_exclude[dependencies][commerce_product_ui] = commerce_product_ui
 features_exclude[dependencies][privatemsg] = privatemsg
