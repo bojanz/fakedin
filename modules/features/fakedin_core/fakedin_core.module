@@ -37,6 +37,19 @@ function fakedin_core_commerce_checkout_pane_info_alter(&$info) {
 }
 
 /**
+ * Implements hook_drupal_goto_alter().
+ */
+function fakedin_core_drupal_goto_alter(&$path, &$options, &$http_response_code) {
+  global $user;
+
+  // Redirect to the profile edit page after the customer creates his account.
+  $item = menu_get_item();
+  if ($path == 'user/'. $user->uid . '/orders' && $item['path'] == 'checkout/%/%') {
+    $path = 'profile/' . $user->uid . '/edit';
+  }
+}
+
+/**
  * Implements hook_theme().
  */
 function fakedin_core_theme($existing, $type, $theme, $path)  {
