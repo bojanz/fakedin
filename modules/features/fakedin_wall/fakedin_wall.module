@@ -7,6 +7,15 @@
 include_once 'fakedin_wall.features.inc';
 
 /**
+ * Implements hook_ctools_plugin_directory().
+ */
+function fakedin_wall_ctools_plugin_directory($owner, $plugin_type) {
+  if ($owner == 'ctools') {
+    return 'plugins/' . $plugin_type;
+  }
+}
+
+/**
  * Implements hook_default_message_type_category().
  */
 function fakedin_wall_default_message_type_category() {
@@ -18,6 +27,37 @@ function fakedin_wall_default_message_type_category() {
   }');
 
   return $items;
+}
+
+/**
+ * Form builder: Returns a create post form.
+ */
+function fakedin_wall_create_post_form($form, &$form_state) {
+  $form['message'] = array(
+    '#title' => 'Post a new message',
+    '#type' => 'textarea',
+    '#rows' => 3,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+
+  return $form;
+}
+
+/**
+ * Submit handler: Initiates checkout.
+ */
+function fakedin_wall_create_post_form_submit($form, &$form_state) {
+  global $user;
+
+  $values = array('type' => 'fakedin_post', 'user' => $user);
+  $message = entity_create('message', $values);
+  $message->field_body[LANGUAGE_NONE][0]['value'] = $form_state['values']['message'];
+  entity_save('message', $message);
+
+  $form_state['redirect'] = 'home';
 }
 
 /**
