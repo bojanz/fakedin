@@ -16,7 +16,6 @@ projects[addressfield][version] = 1.0-beta4
 projects[addressfield][subdir] = "contrib"
 projects[commerce][version] = 1.x-dev
 projects[commerce][subdir] = "contrib"
-projects[commerce][patch][] = "http://drupal.org/files/issues/2144745-1-awesomify-commerce-payment-example.patch"
 
 ; Contrib
 projects[advancedqueue][version] = 1.x-dev
