@@ -69,7 +69,7 @@ function fakedin_core_plan_form($form, &$form_state) {
   foreach ($plans as $plan) {
     $form['plan_select'][$plan->product_id] = array(
       '#type' => 'submit',
-      '#value' => t('Choose plan'),
+      '#value' => t('Choose !plan', array('!plan' => $plan->title)),
       '#plan_id' => $plan->product_id,
     );
   }
